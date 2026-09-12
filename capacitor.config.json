@@ -1,0 +1,16 @@
+{
+  "appId": "com.konishi.pochittokanji",
+  "appName": "ぽちっと漢字",
+  "webDir": "www",
+  "backgroundColor": "#f6f1e6",
+  "ios": {
+    "contentInset": "always",
+    "backgroundColor": "#f6f1e6"
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_icon",
+      "iconColor": "#c8412b"
+    }
+  }
+}
