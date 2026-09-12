@@ -9,12 +9,12 @@
   'use strict';
 
   // ---- 広告ユニットID -------------------------------------------------
-  // Google公式テストID。本番IDに差し替えたら IS_TESTING を false にする。
-  var IS_TESTING = true;
+  // 本番ID(AdMob 2026-09-12 発行)。テストしたいときだけ IS_TESTING を true にする。
+  var IS_TESTING = false;
   var AD_IDS = {
-    banner: 'ca-app-pub-3940256099942544/2934735716',
-    interstitial: 'ca-app-pub-3940256099942544/4411468910',
-    rewarded: 'ca-app-pub-3940256099942544/1712485313'
+    banner: 'ca-app-pub-7792368657314009/1806122369',
+    interstitial: 'ca-app-pub-7792368657314009/7856525399',
+    rewarded: 'ca-app-pub-7792368657314009/8725919787'
   };
   var PRODUCT_ID = 'pochittokanji_premium'; // 非消耗型 ¥480 広告なし+ヒント無制限
 
