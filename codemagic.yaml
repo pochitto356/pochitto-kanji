@@ -33,6 +33,12 @@ workflows:
         script: npx @capacitor/assets generate --ios --iconBackgroundColor '#f6f1e6' --splashBackgroundColor '#f6f1e6'
       - name: Capacitor同期
         script: npx cap sync ios
+      - name: 最低対応OSを iOS 15 に(2027年春からAppleが15.0以上を必須化)
+        script: |
+          cd ios/App
+          sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;/IPHONEOS_DEPLOYMENT_TARGET = 15.0;/g' App.xcodeproj/project.pbxproj
+          sed -i '' "s/platform :ios, '[0-9.]*'/platform :ios, '15.0'/" Podfile
+          pod install
       - name: Info.plist調整(暗号化申告・縦画面固定・AdMob/ATT)
         script: |
           PLIST=ios/App/App/Info.plist
