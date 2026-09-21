@@ -20,6 +20,8 @@ html,body{margin:0;height:100%;background:var(--washi);color:var(--ink);font-fam
 body{background-image:radial-gradient(rgba(0,0,0,.025) 1px,transparent 1px);background-size:6px 6px}
 #app{max-width:480px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;
   padding:calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 16px)}
+/* iPad など広い画面では全体を拡大(縦長のまま中央の1カラム) */
+@media (min-width:700px){#app{zoom:1.55}}
 .screen{display:none;flex:1;flex-direction:column}
 .screen.on{display:flex}
 h1.logo{font-family:var(--serif);font-weight:700;font-size:40px;letter-spacing:.06em;margin:24px 0 4px;text-align:center}
