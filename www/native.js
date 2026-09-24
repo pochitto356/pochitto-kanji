@@ -36,19 +36,69 @@
   }
 
   // ---- 初期化 ---------------------------------------------------------
-  // 手順は必ずこの順番: ATTの許可ダイアログ → AdMob初期化 → 課金初期化(deviceready後)
   function init() {
     if (!isApp) { log('browser mode'); return Promise.resolve(); }
     AdMob = C.Plugins.AdMob;
     LocalNotifications = C.Plugins.LocalNotifications;
-    return initAds().then(initIAP).catch(function (e) { log('init error', e); });
+    // 順番が重要: ATTの許可ダイアログ → AdMob初期化 → 課金初期化
+    return requestATT().then(initAds).then(initIAP).catch(function (e) { log('init error', e); });
+  }
+
+  /* ---- ATT(トラッキングの許可) --------------------------------------
+   * @capacitor-community/admob 7系では initialize() の
+   * requestTrackingAuthorization オプションが廃止されている。
+   * AdMob.requestTrackingAuthorization() を自分で呼ばないとダイアログは出ない。
+   * (1.0(4) がガイドライン2.1で差し戻された原因。2026-09-23)
+   *
+   * さらに iOS はアプリがアクティブになる前に要求すると、ダイアログを出さずに
+   * 黙って拒否する。画面が表示されてから少し待って呼ぶこと。          */
+  function whenActive() {
+    return new Promise(function (resolve) {
+      var done = false;
+      var fire = function () {
+        if (done) return; done = true;
+        document.removeEventListener('visibilitychange', onVis);
+        setTimeout(resolve, 800); // スプラッシュが消えてアクティブになるのを待つ
+      };
+      var onVis = function () { if (document.visibilityState === 'visible') fire(); };
+      if (document.visibilityState === 'visible') { fire(); return; }
+      document.addEventListener('visibilitychange', onVis);
+      setTimeout(fire, 5000); // 保険
+    });
+  }
+
+  function attStatus() {
+    if (!AdMob || !AdMob.trackingAuthorizationStatus) return Promise.resolve(null);
+    return AdMob.trackingAuthorizationStatus().catch(function () { return null; });
+  }
+
+  function requestATT() {
+    if (!AdMob || !AdMob.requestTrackingAuthorization) return Promise.resolve();
+    return whenActive()
+      .then(attStatus)
+      .then(function (r) {
+        var st = r && r.status;
+        log('ATT status', st);
+        if (st && st !== 'notDetermined') return; // 回答済みなら出さない
+        return AdMob.requestTrackingAuthorization();
+      })
+      .then(attStatus)
+      .then(function (r) {
+        // 要求が届かず未回答のままなら、もう一度だけ出し直す
+        if (r && r.status === 'notDetermined') {
+          return new Promise(function (res) { setTimeout(res, 2000); })
+            .then(function () { return AdMob.requestTrackingAuthorization(); })
+            .then(attStatus);
+        }
+        return r;
+      })
+      .then(function (r) { log('ATT result', r && r.status); })
+      .catch(function (e) { log('ATT error', e); });
   }
 
   function initAds() {
     if (!AdMob) return Promise.resolve();
-    // requestTrackingAuthorization:true で AdMob 初期化の前に ATT ダイアログが出る
     return AdMob.initialize({
-      requestTrackingAuthorization: true,
       initializeForTesting: IS_TESTING
     }).then(function () {
       log('admob ready');
